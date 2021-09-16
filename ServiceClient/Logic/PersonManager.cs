@@ -21,6 +21,11 @@ namespace ServiceClient.Logic
 
         public void Add(Person person)
         {
+            if (person == null)
+            {
+                throw new ArgumentNullException(nameof(person));
+            }
+
             var isInvalid = !_validator.ValidNewPerson(person);
             
             if (isInvalid)

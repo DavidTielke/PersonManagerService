@@ -21,10 +21,6 @@ namespace ServiceClient.Logic
             return idIsValid && nameIsValid && ageIsValid;
         }
 
-
-        // ID > 0
-        // Name != "" || null
-        // Age > 0 && < 99
         public bool ValidExistingPerson(Person person)
         {
             if (person == null)
