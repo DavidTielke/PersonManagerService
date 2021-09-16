@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using ServiceClient.Models;
 
 namespace UnitTests.Logic.PersonManagerTests
@@ -25,7 +26,9 @@ namespace UnitTests.Logic.PersonManagerTests
         public void Add_InvalidPerson_Rejected()
         {
             var person = new Person();
-            _validatorStub.ReturnValue = false;
+            _validatorMock
+                .Setup(m => m.ValidNewPerson(It.IsAny<Person>()))
+                .Returns(false);
 
             Action action = () => _sut.Add(person);
 
@@ -36,7 +39,9 @@ namespace UnitTests.Logic.PersonManagerTests
         public void Add_ValidPerson_Accepted()
         {
             var person = new Person();
-            _validatorStub.ReturnValue = true;
+            _validatorMock
+                .Setup(m => m.ValidNewPerson(It.IsAny<Person>()))
+                .Returns(true);
 
             _sut.Add(person);
         }
@@ -45,7 +50,9 @@ namespace UnitTests.Logic.PersonManagerTests
         public void Add_InvalidPerson_NotAddedToRepo()
         {
             var person = new Person();
-            _validatorStub.ReturnValue = false;
+            _validatorMock
+                .Setup(m => m.ValidNewPerson(It.IsAny<Person>()))
+                .Returns(false);
 
             Action action = () => _sut.Add(person);
 
@@ -55,18 +62,22 @@ namespace UnitTests.Logic.PersonManagerTests
             }
             catch{}
 
-            _repoStub.WasAdded.Should().BeFalse();
+            _repoMock
+                .Verify(m => m.Insert(It.IsAny<Person>()), Times.Never);
         }
 
         [TestMethod]
         public void Add_ValidPerson_AddedToRepo()
         {
             var person = new Person();
-            _validatorStub.ReturnValue = true;
+            _validatorMock
+                .Setup(m => m.ValidNewPerson(It.IsAny<Person>()))
+                .Returns(true);
 
             _sut.Add(person);
 
-            _repoStub.WasAdded.Should().BeTrue();
+            _repoMock
+                .Verify(m => m.Insert(It.IsAny<Person>()), Times.Once);
         }
     }
 }
