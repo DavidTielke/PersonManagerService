@@ -22,7 +22,7 @@ namespace ServiceClient.Logic
         public void Add(Person person)
         {
             var isInvalid = !_validator.ValidNewPerson(person);
-
+            
             if (isInvalid)
             {
                 throw new ArgumentException("Person is not in valid format", nameof(person));
