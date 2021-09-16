@@ -1,56 +1,28 @@
 using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
+using ServiceClient.FrameworkAdapter;
 using ServiceClient.Logic;
 using ServiceClient.Models;
 
 namespace IntegrationTests
 {
-    public class StoreHelper
-    {
-        public void Clear()
-        {
-            File.WriteAllText("data.csv","");
-        }
-
-        public void Add(Person person)
-        {
-            var lines = File.ReadAllLines("data.csv").ToList();
-            lines.Add($"{person.Id},{person.Name},{person.Age}");
-            File.WriteAllLines("data.csv", lines.ToArray());
-        }
-
-        public void Seed()
-        {
-            var persons = new List<Person>
-            {
-                new Person(1, "Test1", 2),
-                new Person(2, "Test2", 3),
-                new Person(3, "Test3", 4),
-            };
-
-            var lines = persons.Select(p => $"{p.Id},{p.Name},{p.Age}");
-
-            var data = string.Join(Environment.NewLine, lines);
-
-            File.WriteAllText("data.csv", data);
-        }
-    }
-
     [TestClass]
-    public class UnitTest1
+    public class DateStoreTest
     {
         private StoreHelper _store = new StoreHelper();
+        private Mock<IDateTimeAdapter> _datetimeMock;
         private PersonRepository _sut;
 
         [TestInitialize]
         public void Setup()
         {
-            _sut = new PersonRepository();
+            _datetimeMock = new Mock<IDateTimeAdapter>();
+            _datetimeMock.Setup(m => m.Now).Returns(DateTime.Now);
+            _sut = new PersonRepository(_datetimeMock.Object);
             _store.Seed();
         }
 
@@ -80,6 +52,18 @@ namespace IntegrationTests
             _sut.Insert(person2);
 
             _sut.Query.ToList().Count.Should().Be(5);
+        }
+
+        [TestMethod]
+        public void Insert_3PeopleInStore_CreatedAtIsCorrect()
+        {
+            var person1 = new Person(0, "David", 37);
+            _datetimeMock.Setup(m => m.Now).Returns(new DateTime(2021, 9, 15));
+
+            _sut.Insert(person1);
+            var lastPerson = _sut.Query.Last();
+
+            lastPerson.CreatedAt.Should().Be(new DateTime(2021, 9, 15));
         }
     }
 }

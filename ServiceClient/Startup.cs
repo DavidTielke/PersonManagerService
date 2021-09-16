@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ServiceClient.FrameworkAdapter;
 using ServiceClient.Logic;
 
 namespace ServiceClient
@@ -30,6 +31,7 @@ namespace ServiceClient
             services.AddScoped<IPersonRepository, PersonRepository>();
             services.AddTransient<IPersonManager, PersonManager>();
             services.AddTransient<IPersonValidator, PersonValidator>();
+            services.AddTransient<IDateTimeAdapter, DateTimeAdapter>();
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
